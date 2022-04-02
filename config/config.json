@@ -1,0 +1,7 @@
+{
+  "server_host": "localhost",
+  "server_port": 8080,
+  "db_dsn": "root:root@tcp(127.0.0.1:3366)/todo?parseTime=true",
+  "db_max_open_conns": 10,
+  "db_max_idle_conns": 5
+}

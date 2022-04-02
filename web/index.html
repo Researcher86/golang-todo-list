@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To Do List</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet"/>
+    <!-- MDB -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.11.0/mdb.min.css" rel="stylesheet"/>
+    <!-- MDB -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.11.0/mdb.min.js"></script>
+
+<!--    https://cdnjs.com/libraries/socket.io/4.4.1-->
+
+<!--    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>-->
+<!--    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js" integrity="sha512-MgkNs0gNdrnOM7k+0L+wgiRc5aLgl74sJQKbIWegVIMvVGPc1+gc1L2oK9Wf/D9pq58eqIJAxOonYPVE5UwUFA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.4/socket.io.min.js" integrity="sha512-qXjK7fRhV6plK/Vpaknn+5Fe0dXhJqdbiQKpLghl0XKir10zEEzSNqheA1MY7nh9H8cu7giAYTibHTBvt37PQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.min.js" integrity="sha512-gfppNkmmwLyyV/BXmzS9uWWbjxe0owp9N3wx9NeGmIHkFOiRM0EMmQte753JyYZd9uzIbjuSqPOvME0SvADXhw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.min.js" integrity="sha512-I9p4eOeWXGM9m5GhJYd3UDUA5Lr+Epp5e4ykWFYW9hv3jZqdR92S5p+ApMSWuMaV4E+JqILepP1G9kNer4AFGQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.2/socket.io.min.js" integrity="sha512-N5JbZMETkl+0SZh5l8OA2VxSfF120owfQyy54iAXTJIKuqAn3A9TrNz1ypB55o8aSU5MxaodEgv74wGUvgUynQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js" integrity="sha512-aC5ZfKOuGRUiJCv+E/EIWsj49E02BQpuLQbixZe+16Lm1R6AepHZA1xvY92XBQNNbwQoqG4DXCGxwoxBFb5Q1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.min.js" integrity="sha512-gfppNkmmwLyyV/BXmzS9uWWbjxe0owp9N3wx9NeGmIHkFOiRM0EMmQte753JyYZd9uzIbjuSqPOvME0SvADXhw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body onload="init()">
+<section>
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col col-xl-10">
+
+                <div class="card" style="border-radius: 15px; box-shadow: 0 0px 100px 30px rgb(0 0 0 / 7%), 0 4px 6px -2px rgb(0 0 0 / 5%)">
+                    <div class="card-body p-5">
+
+                        <h6 class="mb-3">Awesome Todo List</h6>
+
+                        <form id="form-add-ticket" class="d-flex justify-content-center align-items-center mb-4">
+                            <div class="form-outline flex-fill">
+                                <input type="text" id="form-add-ticket-text" class="form-control form-control-lg" />
+                                <label class="form-label" for="form-add-ticket-text">What do you need to do today?</label>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-lg ms-2" onclick="addTicket()">Add</button>
+                        </form>
+
+                        <ul id="to-do-list" class="list-group mb-0">
+                        </ul>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function init() {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/tickets",
+            success: function (data) {
+                for (let i = 0; i < data.length; i++) {
+                    addTicketToList(data[i])
+                }
+            },
+            dataType: "json"
+        });
+    }
+
+    function addTicket() {
+        var text = document.getElementById('form-add-ticket-text').value
+        if (!text) {
+            return
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "http://localhost:8080/api/tickets",
+            data: JSON.stringify(
+                {
+                    title: text
+                }
+            ),
+            dataType: "json"
+        });
+
+        document.getElementById('form-add-ticket-text').value = ''
+    }
+
+    // var socket = io("http://localhost:3000");
+    var socket = io();
+    // client-side
+    socket.on("connect", () => {
+        console.log('Connected'); // x8WIv7-mJelg7on_ALbx
+    });
+
+    socket.on("ticket-created", (data) => {
+        var json = JSON.parse(data)
+        console.log(json);
+
+        addTicketToList(json)
+    });
+
+    socket.on("ticket-completed", (data) => {
+        var json = JSON.parse(data)
+        console.log(json);
+
+        document.getElementById('todo-item-ckeck-complete-' + json.id).checked = true;
+    });
+
+    socket.on("ticket-deleted", (data) => {
+        var json = JSON.parse(data)
+        console.log(json);
+
+        var item = document.getElementById('todo-item-' + json.id);
+        item.parentNode.removeChild(item);
+    });
+
+    socket.on("disconnect", () => {
+        console.log('Disconnected');
+    });
+
+    function addTicketToList(ticket) {
+        const li = document.createElement('li');
+
+        li.className = 'list-group-item d-flex justify-content-between align-items-center border-start-0 border-top-0 border-end-0 border-bottom rounded-0 mb-2';
+        li.id = 'todo-item-' + ticket.id;
+        li.innerHTML = `
+            <div class="d-flex align-items-center">
+                <input id="todo-item-ckeck-complete-${ticket.id}" class="form-check-input me-2" type="checkbox" ${ticket.status === 2 ? 'checked' : ''} value="" aria-label="..." onclick="completeTicket(${ticket.id})"/>
+                ${ticket.title}
+            </div>
+            <a href="javascript:void(0)" data-mdb-toggle="tooltip" title="Remove item" onclick="deleteTicket(${ticket.id})">
+                <i class="fas fa-times text-primary"></i>
+            </a>
+          `;
+
+        document.getElementById('to-do-list').appendChild(li)
+    }
+
+    function deleteTicket(id) {
+        $.ajax({
+            type: "DELETE",
+            url: "http://localhost:8080/api/tickets/" + id + '/delete'
+        });
+    }
+
+    function completeTicket(id) {
+        $.ajax({
+            type: "PUT",
+            url: "http://localhost:8080/api/tickets/" + id + '/complete'
+        });
+    }
+</script>
+</body>
+</html>
