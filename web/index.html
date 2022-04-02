@@ -37,13 +37,13 @@
 
                         <h6 class="mb-3">Awesome Todo List</h6>
 
-                        <form id="form-add-ticket" class="d-flex justify-content-center align-items-center mb-4">
+                        <div id="form-add-ticket" class="d-flex justify-content-center align-items-center mb-4">
                             <div class="form-outline flex-fill">
-                                <input type="text" id="form-add-ticket-text" class="form-control form-control-lg" />
+                                <input type="text" id="form-add-ticket-text" class="form-control form-control-lg" onkeyup="onEnter(event)"/>
                                 <label class="form-label" for="form-add-ticket-text">What do you need to do today?</label>
                             </div>
                             <button type="button" class="btn btn-primary btn-lg ms-2" onclick="addTicket()">Add</button>
-                        </form>
+                        </div>
 
                         <ul id="to-do-list" class="list-group mb-0">
                         </ul>
@@ -68,6 +68,13 @@
             },
             dataType: "json"
         });
+    }
+
+    function onEnter(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            addTicket()
+        }
     }
 
     function addTicket() {
